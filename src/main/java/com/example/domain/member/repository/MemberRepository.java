@@ -21,7 +21,15 @@ public class MemberRepository {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    private static final String TABLE = "member";
+    private static final String TABLE = "MEMBER";
+
+    static final RowMapper<Member> rowMapper = (ResultSet resultSet, int rowNum) -> Member.builder()
+            .id(resultSet.getLong("id"))
+            .email(resultSet.getString("email"))
+            .nickname(resultSet.getString("nickname"))
+            .birthday(resultSet.getObject("birthday", LocalDate.class))
+            .createdAt(resultSet.getObject("createdAt", LocalDateTime.class))
+            .build();
 
     public Optional<Member> findById(Long id) {
         /**
@@ -29,17 +37,8 @@ public class MemberRepository {
          * FROM Member
          * WHERE id = :id
          */
-
         String sql = String.format("SELECT * FROM %s WHERE id = :id", TABLE);
         MapSqlParameterSource param = new MapSqlParameterSource().addValue("id", id);
-
-        RowMapper<Member> rowMapper = (ResultSet resultSet, int rowNum) -> Member.builder()
-                .id(resultSet.getLong("id"))
-                .email(resultSet.getString("email"))
-                .nickname(resultSet.getString("nickname"))
-                .birthday(resultSet.getObject("birthday", LocalDate.class))
-                .createdAt(resultSet.getObject("createdAt", LocalDateTime.class))
-                .build();
 
         Member member = namedParameterJdbcTemplate.queryForObject(sql, param, rowMapper);
         return Optional.ofNullable(member);
@@ -59,7 +58,7 @@ public class MemberRepository {
 
     private Member insert(Member member) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(namedParameterJdbcTemplate.getJdbcTemplate())
-                .withTableName("Member")
+                .withTableName(TABLE)
                 .usingGeneratedKeyColumns("id");
 
         SqlParameterSource params = new BeanPropertySqlParameterSource(member);
@@ -75,7 +74,10 @@ public class MemberRepository {
     }
 
     private Member update(Member member) {
-        // TODO: implemented
+        String sql = String.format("UPDATE %s SET email = :email, nickname = :nickname, birthday = :birthday WHERE id = :id", TABLE);
+
+        SqlParameterSource param = new BeanPropertySqlParameterSource(member);
+        namedParameterJdbcTemplate.update(sql, param);
 
         return member;
     }

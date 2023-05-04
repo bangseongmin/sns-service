@@ -3,6 +3,8 @@ package com.example.domain.member.service;
 import com.example.domain.member.dto.MemberDto;
 import com.example.domain.member.dto.RegisterMemberCommand;
 import com.example.domain.member.entity.Member;
+import com.example.domain.member.entity.MemberNicknameHistory;
+import com.example.domain.member.repository.MemberNicknameHistoryRepository;
 import com.example.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,8 @@ import static com.example.domain.member.dto.MemberDto.toDto;
 public class MemberWriteService {
 
     private final MemberRepository memberRepository;
+
+    private final MemberNicknameHistoryRepository memberNicknameHistoryRepository;
 
     public MemberDto register(RegisterMemberCommand command) {
         /**
@@ -33,6 +37,26 @@ public class MemberWriteService {
 
         Member saveMember = memberRepository.save(member);
 
+        saveMemberNicknameHistory(saveMember.getId(), saveMember.getNickname());
         return toDto(saveMember);
+    }
+
+    public void changeNickname(Long memberId, String nickname) {
+        /**
+         * 1. 회원의 이름을 변경
+         * 2. 변경 내역을 저장
+         */
+        Member member = memberRepository.findById(memberId).orElseThrow();
+        member.changeNickname(nickname);
+        memberRepository.save(member);
+        
+        saveMemberNicknameHistory(memberId, nickname);
+    }
+
+    private void saveMemberNicknameHistory(Long memberId, String nickname) {
+        memberNicknameHistoryRepository.save(MemberNicknameHistory.builder()
+                .memberId(memberId)
+                .nickname(nickname)
+                .build());
     }
 }
