@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.application.controller;
 
 import com.example.domain.member.dto.MemberDto;
 import com.example.domain.member.dto.MemberNicknameHistoryDto;

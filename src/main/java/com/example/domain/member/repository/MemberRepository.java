@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -42,6 +43,12 @@ public class MemberRepository {
 
         Member member = namedParameterJdbcTemplate.queryForObject(sql, param, rowMapper);
         return Optional.ofNullable(member);
+    }
+
+    public List<Member> findAllByIdInIds(List<Long> ids) {
+        String sql = String.format("SELECT * FROM %s WHERE id in (:ids)", TABLE);
+        MapSqlParameterSource param = new MapSqlParameterSource().addValue("ids", ids);
+        return namedParameterJdbcTemplate.query(sql, param, rowMapper);
     }
 
     public Member save(Member member) {

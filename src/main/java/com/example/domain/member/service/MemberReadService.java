@@ -31,4 +31,15 @@ public class MemberReadService {
                 .map(MemberNicknameHistoryDto::toDto)
                 .collect(Collectors.toList());
     }
+
+    public List<MemberDto> findAllByIdInIds(List<Long> ids) {
+        if(ids.isEmpty()) return List.of();
+
+        List<Member> members = memberRepository.findAllByIdInIds(ids);
+
+        return members.stream()
+                .map(MemberDto::toDto)
+                .collect(Collectors.toList());
+    }
+
 }
