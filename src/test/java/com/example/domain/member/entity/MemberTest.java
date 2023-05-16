@@ -1,6 +1,6 @@
 package com.example.domain.member.entity;
 
-import com.example.domain.member.util.MemberFixtureFactory;
+import com.example.util.MemberFixtureFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
