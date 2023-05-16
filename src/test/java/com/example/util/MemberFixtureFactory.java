@@ -1,4 +1,4 @@
-package com.example.domain.member.util;
+package com.example.util;
 
 import com.example.domain.member.entity.Member;
 import org.jeasy.random.EasyRandom;
