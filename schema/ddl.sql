@@ -50,5 +50,8 @@ create index POST__index_member_id
 create index POST__index_created_date
     on POST (createdDate);
 
+create index POST__index_created_date__and__created_date
+    on POST (memberId, createdDate);
+
 
 
