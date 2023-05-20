@@ -1,4 +1,4 @@
-package com.example.domain;
+package com.example.util;
 
 import org.springframework.data.domain.Sort;
 
