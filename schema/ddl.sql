@@ -33,25 +33,37 @@
 #     on Follow (fromMemberId, toMemberId);
 
 
-create table POST
-(
+# create table POST
+# (
+#     id int auto_increment,
+#     memberId int not null,
+#     contents varchar(100) not null,
+#     createdDate date not null,
+#     createdAt datetime not null,
+#     constraint POST_id_uindex
+#         primary key (id)
+# );
+#
+# create index POST__index_member_id
+#     on POST (memberId);
+#
+# create index POST__index_created_date
+#     on POST (createdDate);
+#
+# create index POST__index_created_date__and__created_date
+#     on POST (memberId, createdDate);
+#
+
+CREATE TABLE Timeline (
     id int auto_increment,
     memberId int not null,
-    contents varchar(100) not null,
-    createdDate date not null,
+    postId int not null,
     createdAt datetime not null,
-    constraint POST_id_uindex
-        primary key (id)
+    constraint Timeline_id_uindex
+    primary key (id)
 );
 
-create index POST__index_member_id
-    on POST (memberId);
+CREATE index Timeline__index_member_id on Timeline (memberId);
 
-create index POST__index_created_date
-    on POST (createdDate);
-
-create index POST__index_created_date__and__created_date
-    on POST (memberId, createdDate);
-
-
-
+SELECT *
+FROM timeline;
