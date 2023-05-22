@@ -1,5 +1,7 @@
 package com.example.application.controller;
 
+import com.example.application.usecase.CreateFollowMemberUsacase;
+import com.example.application.usecase.CreatePostUsecase;
 import com.example.application.usecase.GetTimelinePostUsecase;
 import com.example.domain.post.dto.DailyPostCount;
 import com.example.domain.post.dto.DailyPostCountRequest;
@@ -24,10 +26,11 @@ public class PostController {
     private final PostWriteService postWriteService;
     private final PostReadService postReadService;
     private final GetTimelinePostUsecase getTimelinePostUsecase;
+    private final CreatePostUsecase createPostUsecase;
 
     @PostMapping
     public Long create(PostCommand command) {
-        return postWriteService.create(command);
+        return createPostUsecase.execute(command);
     }
 
     @GetMapping("/daily-post-counts")
@@ -56,6 +59,6 @@ public class PostController {
             @PathVariable Long memberId,
             CursorRequest cursorRequest
     ) {
-        return getTimelinePostUsecase.execute(memberId, cursorRequest);
+        return getTimelinePostUsecase.executeByTimeline(memberId, cursorRequest);
     }
 }
