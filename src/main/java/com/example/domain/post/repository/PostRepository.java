@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
@@ -33,6 +34,7 @@ public class PostRepository {
             .id(resultSet.getLong("id"))
             .memberId(resultSet.getLong("memberId"))
             .contents(resultSet.getString("contents"))
+            .likes(resultSet.getLong("likes"))
             .createdDate(resultSet.getObject("createdDate", LocalDate.class))
             .createdAt(resultSet.getObject("createdAt", LocalDateTime.class))
             .build();
@@ -49,7 +51,7 @@ public class PostRepository {
             return insert(post);
         }
 
-        throw new UnsupportedOperationException("POST는 갱신을 지원하지 않습니다.");
+        return update(post);
     }
 
     public void bulkInsert(List<Post> posts) {
@@ -83,6 +85,22 @@ public class PostRepository {
                 .build();
     }
 
+    private Post update(Post post) {
+        String sql = String.format("""
+                UPDATE %s
+                SET memberId = :memberId,
+                    contents = :contents,
+                    likes = :likes,
+                    createdDate = :createdDate,
+                    createdAt = :createdAt
+                WHERE id = :id
+                """, TABLE);
+
+        SqlParameterSource params = new BeanPropertySqlParameterSource(post);
+        namedParameterJdbcTemplate.update(sql, params);
+        return post;
+    }
+
     public List<DailyPostCount> groupByCreatedDate(DailyPostCountRequest request) {
         String sql = String.format("""
                 SELECT createdDate, memberId, count(id) as count
@@ -107,6 +125,21 @@ public class PostRepository {
                 .addValue("memberId", memberId);
 
         return namedParameterJdbcTemplate.queryForObject(sql, params, Long.class);
+    }
+
+    public Optional<Post> findById(Long postId, Boolean requiredLock) {
+        String sql = String.format("SELECT * FROM %s WHERE id = :postId", TABLE);
+
+        if(requiredLock) {
+            sql += " FOR UPDATE";
+        }
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("postId", postId);
+
+        Post post = namedParameterJdbcTemplate.queryForObject(sql, params, ROW_MAPPER);
+
+        return Optional.ofNullable(post);
     }
 
     public List<Post> findAllByInIds(List<Long> ids) {
