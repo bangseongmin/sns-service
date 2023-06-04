@@ -2,7 +2,9 @@ package com.example.domain.post.service;
 
 import com.example.domain.post.dto.DailyPostCount;
 import com.example.domain.post.dto.DailyPostCountRequest;
+import com.example.domain.post.dto.PostDto;
 import com.example.domain.post.entity.Post;
+import com.example.domain.post.repository.PostLikeRepository;
 import com.example.domain.post.repository.PostRepository;
 import com.example.util.CursorRequest;
 import com.example.util.PageCursor;
@@ -12,12 +14,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class PostReadService {
 
     private final PostRepository postRepository;
+
+    private final PostLikeRepository postLikeRepository;
 
     public List<DailyPostCount> getDailyPostCount(DailyPostCountRequest request) {
         /**
@@ -33,8 +38,21 @@ public class PostReadService {
         return postRepository.groupByCreatedDate(request);
     }
 
-    public Page<Post> getPosts(Long memberId, Pageable Pageable) {
-        return postRepository.findAllByMemberId(memberId, Pageable);
+    public Post getPost(Long postId) {
+        return postRepository.findById(postId, false).orElseThrow();
+    }
+
+    public Page<PostDto> getPosts(Long memberId, Pageable Pageable) {
+        return postRepository.findAllByMemberId(memberId, Pageable).map(this::fromPost);
+    }
+
+    private PostDto fromPost(Post post) {
+        return new PostDto(
+                post.getId(),
+                post.getContents(),
+                post.getCreatedAt(),
+                postLikeRepository.count(post.getId())
+        );
     }
 
     public PageCursor<Post> getPosts(Long memberId, CursorRequest cursorRequest) {

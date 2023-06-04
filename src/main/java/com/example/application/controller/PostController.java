@@ -1,11 +1,13 @@
 package com.example.application.controller;
 
 import com.example.application.usecase.CreateFollowMemberUsacase;
+import com.example.application.usecase.CreatePostLikeUsacase;
 import com.example.application.usecase.CreatePostUsecase;
 import com.example.application.usecase.GetTimelinePostUsecase;
 import com.example.domain.post.dto.DailyPostCount;
 import com.example.domain.post.dto.DailyPostCountRequest;
 import com.example.domain.post.dto.PostCommand;
+import com.example.domain.post.dto.PostDto;
 import com.example.domain.post.entity.Post;
 import com.example.domain.post.service.PostReadService;
 import com.example.domain.post.service.PostWriteService;
@@ -27,6 +29,7 @@ public class PostController {
     private final PostReadService postReadService;
     private final GetTimelinePostUsecase getTimelinePostUsecase;
     private final CreatePostUsecase createPostUsecase;
+    private final CreatePostLikeUsacase createPostLikeUsacase;
 
     @PostMapping
     public Long create(PostCommand command) {
@@ -39,7 +42,7 @@ public class PostController {
     }
 
     @GetMapping("/members/{memberId}")
-    public Page<Post> getPosts(
+    public Page<PostDto> getPosts(
             @PathVariable Long memberId,
             Pageable pageable
     ) {
@@ -66,5 +69,10 @@ public class PostController {
     public void likePost(@PathVariable Long postId) {
 //        postWriteService.likePost(postId);    비관적 락
         postWriteService.likePostWithOptimisticLock(postId);
+    }
+
+    @PostMapping("/{postId}/like/v2")
+    public void likePostV2(@PathVariable Long postId, @RequestParam Long memberId) {
+        createPostLikeUsacase.execute(postId, memberId);
     }
 }
