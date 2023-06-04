@@ -23,9 +23,21 @@ public class PostWriteService {
         return postRepository.save(post).getId();
     }
 
+    /**
+     * 비관적 락
+     */
     @Transactional
     public void likePost(Long postId) {
         Post post = postRepository.findById(postId, true).orElseThrow();
+        post.incrementLike();
+        postRepository.save(post);
+    }
+
+    /**
+     * 낙관적 락
+     */
+    public void likePostWithOptimisticLock(Long postId) {
+        Post post = postRepository.findById(postId, false).orElseThrow();
         post.incrementLike();
         postRepository.save(post);
     }
