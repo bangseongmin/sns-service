@@ -22,6 +22,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static com.example.util.QueryType.*;
+
 @RequiredArgsConstructor
 @Repository
 public class PostRepository {
@@ -56,10 +58,7 @@ public class PostRepository {
     }
 
     public void bulkInsert(List<Post> posts) {
-        String sql = String.format("""
-                INSERT INTO `%s` (memberId, contents, createdDate, createdAt)
-                VALUES (:memberId, :contents, :createdDate, :createdAt)
-                """, TABLE);
+        String sql = String.format(BULK_INSERT.getQuery(), TABLE, "memberId, contents, createdDate, createdAt", ":memberId, :contents, :createdDate, :createdAt");
 
         SqlParameterSource[] params = posts.stream()
                 .map(BeanPropertySqlParameterSource::new)
@@ -136,7 +135,7 @@ public class PostRepository {
     }
 
     public Optional<Post> findById(Long postId, Boolean requiredLock) {
-        String sql = String.format("SELECT * FROM %s WHERE id = :postId", TABLE);
+        String sql = String.format(FIND_ALL_BY_A.getQuery(), TABLE, "id", "postId");
 
         if(requiredLock) {
             sql += " FOR UPDATE";
@@ -154,11 +153,7 @@ public class PostRepository {
         if(ids.isEmpty())
             return List.of();
 
-        String sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE id in (:ids)
-                """, TABLE);
+        String sql = String.format(FIND_ALL_BY_IN_LIST.getQuery(), TABLE, "id", "ids");
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ids", ids);
@@ -187,13 +182,7 @@ public class PostRepository {
     }
 
     public List<Post> findAllByMemberIdAndOrderByIdDesc(Long memberId, int size) {
-        String sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId = :memberId
-                ORDER BY id desc
-                LIMIT :size
-                """, TABLE);
+        String sql = String.format(FIND_ALL_BY_A_AND_ORDER_BY_B_DESC_HAS_LIMIT.getQuery(), TABLE, "memberId", "memberId", "id", "size");
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
@@ -207,13 +196,7 @@ public class PostRepository {
             return List.of();
         }
 
-        String sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId in (:memberIds)
-                ORDER BY id desc
-                LIMIT :size
-                """, TABLE);
+        String sql = String.format(FIND_ALL_BY_A_AND_ORDER_BY_B_DESC_HAS_LIMIT.getQuery(), TABLE, "memberId", "memberIds", "id", "size");
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberIds", memberIds)
@@ -223,13 +206,8 @@ public class PostRepository {
     }
 
     public List<Post> findAllByLessThanIdAndMemberIdAndOrderByIdDesc(Long id, Long memberId, int size) {
-        String sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId = :memberId and id < :id
-                ORDER BY id desc
-                LIMIT :size
-                """, TABLE);
+        String sql = String.format(FIND_ALL_BY_LESS_THAN_A_AND_B_AND_ORDER_BY_C_DESC.getQuery(),
+                TABLE, "memberId", "memberId", "id", "id", "id", "size");
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
@@ -244,13 +222,9 @@ public class PostRepository {
             return List.of();
         }
 
-        String sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId in (:memberIds) and id < :id
-                ORDER BY id desc
-                LIMIT :size
-                """, TABLE);
+        String sql = String.format(FIND_ALL_BY_LESS_THAN_A_AND_IN_LIST_AND_ORDER_BY_C_DESC.getQuery(),
+                TABLE, "memberId", "memberIds", "id", "id", "id", "size");
+
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberIds", memberIds)

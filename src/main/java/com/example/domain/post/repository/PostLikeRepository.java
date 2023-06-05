@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.time.LocalDateTime;
 
+import static com.example.util.QueryType.COUNT;
+
 @RequiredArgsConstructor
 @Repository
 public class PostLikeRepository {
@@ -53,11 +55,7 @@ public class PostLikeRepository {
     }
 
     public Long count(Long postId) {
-        String sql = String.format("""
-                SELECT count(id)
-                FROM %s
-                WHERE postId = :postId
-                """, TABLE);
+        String sql = String.format(COUNT.getQuery(), TABLE, "postId", "postId");
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("postId", postId);

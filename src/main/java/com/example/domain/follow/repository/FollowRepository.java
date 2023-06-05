@@ -14,6 +14,8 @@ import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.example.util.QueryType.FIND_ALL_BY_A;
+
 @RequiredArgsConstructor
 @Repository
 public class FollowRepository {
@@ -29,14 +31,14 @@ public class FollowRepository {
             .build();
 
     public List<Follow> findAllByFromMemberId(Long fromMemberId) {
-        String sql = String.format("SELECT * FROM %s WHERE fromMemberId = :fromMemberId", TABLE);
+        String sql = String.format(FIND_ALL_BY_A.getQuery(), TABLE, "fromMemberId", "fromMemberId");
         MapSqlParameterSource params = new MapSqlParameterSource().addValue("fromMemberId", fromMemberId);
 
         return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
     }
 
     public List<Follow> findAllByToMemberId(Long toMemberId) {
-        String sql = String.format("SELECT * FROM %s WHERE toMemberId = :toMemberId", TABLE);
+        String sql = String.format(FIND_ALL_BY_A.getQuery(), TABLE, "toMemberId", "toMemberId");
         MapSqlParameterSource params = new MapSqlParameterSource().addValue("toMemberId", toMemberId);
 
         return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
