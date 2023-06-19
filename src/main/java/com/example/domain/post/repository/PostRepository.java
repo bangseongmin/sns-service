@@ -22,6 +22,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static com.example.util.QueryFactory.*;
+import static com.example.util.QueryType.*;
+
 @RequiredArgsConstructor
 @Repository
 public class PostRepository {
@@ -56,10 +59,7 @@ public class PostRepository {
     }
 
     public void bulkInsert(List<Post> posts) {
-        String sql = String.format("""
-                INSERT INTO `%s` (memberId, contents, createdDate, createdAt)
-                VALUES (:memberId, :contents, :createdDate, :createdAt)
-                """, TABLE);
+        String sql = bulkInsertQuery(TABLE, "memberId, contents, createdDate, createdAt", ":memberId, :contents, :createdDate, :createdAt");
 
         SqlParameterSource[] params = posts.stream()
                 .map(BeanPropertySqlParameterSource::new)
@@ -87,16 +87,7 @@ public class PostRepository {
     }
 
     private Post update(Post post) {
-        String sql = String.format("""
-                UPDATE %s
-                SET memberId = :memberId,
-                    contents = :contents,
-                    likes = :likes,
-                    version = :version + 1,
-                    createdDate = :createdDate,
-                    createdAt = :createdAt
-                WHERE id = :id AND version = :version
-                """, TABLE);
+        String sql = updatePost(TABLE);
 
         SqlParameterSource params = new BeanPropertySqlParameterSource(post);
         int updatedRowCount = namedParameterJdbcTemplate.update(sql, params);
@@ -110,12 +101,7 @@ public class PostRepository {
     }
 
     public List<DailyPostCount> groupByCreatedDate(DailyPostCountRequest request) {
-        String sql = String.format("""
-                SELECT createdDate, memberId, count(id) as count
-                FROM %s
-                WHERE memberId = :memberId and createdDate between :firstDate and :lastDate
-                GROUP BY memberId, createdDate
-                """, TABLE);
+        String sql = findByAAndB_BetweenCAndD(TABLE);
 
         BeanPropertySqlParameterSource params = new BeanPropertySqlParameterSource(request);
 
@@ -123,11 +109,7 @@ public class PostRepository {
     }
 
     public Long getCount(Long memberId) {
-        String sql = String.format("""
-                SELECT count(id)
-                FROM %s
-                WHERE memberId = :memberId
-                """, TABLE);
+        String sql = countByA(TABLE, "memberId", ":memberId");
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberId", memberId);
@@ -136,7 +118,7 @@ public class PostRepository {
     }
 
     public Optional<Post> findById(Long postId, Boolean requiredLock) {
-        String sql = String.format("SELECT * FROM %s WHERE id = :postId", TABLE);
+        String sql = findAllByA(TABLE, "id", "postId");
 
         if(requiredLock) {
             sql += " FOR UPDATE";
@@ -154,11 +136,7 @@ public class PostRepository {
         if(ids.isEmpty())
             return List.of();
 
-        String sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE id in (:ids)
-                """, TABLE);
+        String sql = findAllByAInList(TABLE, "id", "ids");
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("ids", ids);
@@ -167,14 +145,7 @@ public class PostRepository {
     }
 
     public Page<Post> findAllByMemberId(Long memberId, Pageable pageable) {
-        String sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId = :memberId
-                ORDER BY %s
-                LIMIT :size
-                OFFSET :offset
-                """, TABLE, PageHelper.orderBy(pageable.getSort()));
+        String sql = findAllByA(TABLE, pageable);
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
@@ -187,13 +158,7 @@ public class PostRepository {
     }
 
     public List<Post> findAllByMemberIdAndOrderByIdDesc(Long memberId, int size) {
-        String sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId = :memberId
-                ORDER BY id desc
-                LIMIT :size
-                """, TABLE);
+        String sql = findAllByAAndOrderByBOrderDir(TABLE, "memberId", "memberId", "id", "size");
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
@@ -207,13 +172,7 @@ public class PostRepository {
             return List.of();
         }
 
-        String sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId in (:memberIds)
-                ORDER BY id desc
-                LIMIT :size
-                """, TABLE);
+        String sql = findAllByInAAndOrderByBOrderDir(TABLE, "memberId", "memberId", "id", "size");
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberIds", memberIds)
@@ -223,13 +182,7 @@ public class PostRepository {
     }
 
     public List<Post> findAllByLessThanIdAndMemberIdAndOrderByIdDesc(Long id, Long memberId, int size) {
-        String sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId = :memberId and id < :id
-                ORDER BY id desc
-                LIMIT :size
-                """, TABLE);
+        String sql = findAllByLessThanAAndBAndOrderByCDesc(TABLE, "memberId", "memberId", "id", "id", "id", "size");
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
@@ -244,13 +197,7 @@ public class PostRepository {
             return List.of();
         }
 
-        String sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId in (:memberIds) and id < :id
-                ORDER BY id desc
-                LIMIT :size
-                """, TABLE);
+        String sql = findAllByLessThanAAndInBListAndOrderByCDesc(TABLE, "memberId", "memberIds", "id", "id", "id", "size");
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberIds", memberIds)

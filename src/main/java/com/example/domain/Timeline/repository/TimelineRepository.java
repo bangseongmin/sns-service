@@ -15,6 +15,9 @@ import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.example.util.QueryFactory.bulkInsertTimeLine;
+import static com.example.util.QueryType.*;
+
 @RequiredArgsConstructor
 @Repository
 public class TimelineRepository {
@@ -31,13 +34,7 @@ public class TimelineRepository {
             .build();
 
     public List<Timeline> findAllByMemberIdAndOrderByIdDesc(Long memberId, int size) {
-        String sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId = :memberId
-                ORDER BY id desc
-                LIMIT :size
-                """, TABLE);
+        String sql = String.format(FIND_ALL_BY_A_AND_ORDER_BY_B_DESC_HAS_LIMIT.getQuery(), TABLE, "memberId", "memberId", "id", "size");
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
@@ -47,13 +44,7 @@ public class TimelineRepository {
     }
 
     public List<Timeline> findAllByLessThanIdAndMemberIdAndOrderByIdDesc(Long id, Long memberId, int size) {
-        String sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId = :memberId and id < :id
-                ORDER BY id desc
-                LIMIT :size
-                """, TABLE);
+        String sql = String.format(FIND_ALL_BY_LESS_THAN_A_AND_B_AND_ORDER_BY_C_DESC.getQuery(), TABLE, "memberId", "memberId", "id", "id", "id", "size");
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
@@ -88,10 +79,7 @@ public class TimelineRepository {
     }
 
     public void bulkInsert(List<Timeline> timelines) {
-        String sql = String.format("""
-                INSERT INTO `%s` (memberId, postId, createdAt)
-                VALUES (:memberId, :postId, :createdAt)
-                """, TABLE);
+        String sql = bulkInsertTimeLine(timelines, TABLE);
 
         SqlParameterSource[] params = timelines.stream()
                 .map(BeanPropertySqlParameterSource::new)
