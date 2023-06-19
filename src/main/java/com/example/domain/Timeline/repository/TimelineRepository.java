@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.example.util.QueryFactory.bulkInsertTimeLine;
 import static com.example.util.QueryType.*;
 
 @RequiredArgsConstructor
@@ -78,7 +79,7 @@ public class TimelineRepository {
     }
 
     public void bulkInsert(List<Timeline> timelines) {
-        String sql = String.format(BULK_INSERT.getQuery(), TABLE, "memberId, postId, createdAt", ":memberId, :postId, :createdAt");
+        String sql = bulkInsertTimeLine(timelines, TABLE);
 
         SqlParameterSource[] params = timelines.stream()
                 .map(BeanPropertySqlParameterSource::new)

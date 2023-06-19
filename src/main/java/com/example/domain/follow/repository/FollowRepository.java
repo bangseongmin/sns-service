@@ -1,6 +1,8 @@
 package com.example.domain.follow.repository;
 
 import com.example.domain.follow.entity.Follow;
+import static com.example.util.QueryFactory.findAllByA;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -13,8 +15,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static com.example.util.QueryType.FIND_ALL_BY_A;
 
 @RequiredArgsConstructor
 @Repository
@@ -31,14 +31,14 @@ public class FollowRepository {
             .build();
 
     public List<Follow> findAllByFromMemberId(Long fromMemberId) {
-        String sql = String.format(FIND_ALL_BY_A.getQuery(), TABLE, "fromMemberId", "fromMemberId");
+        String sql = findAllByA(TABLE, "fromMemberId", "fromMemberId");
         MapSqlParameterSource params = new MapSqlParameterSource().addValue("fromMemberId", fromMemberId);
 
         return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
     }
 
     public List<Follow> findAllByToMemberId(Long toMemberId) {
-        String sql = String.format(FIND_ALL_BY_A.getQuery(), TABLE, "toMemberId", "toMemberId");
+        String sql = findAllByA(TABLE, "toMemberId", "toMemberId");
         MapSqlParameterSource params = new MapSqlParameterSource().addValue("toMemberId", toMemberId);
 
         return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);

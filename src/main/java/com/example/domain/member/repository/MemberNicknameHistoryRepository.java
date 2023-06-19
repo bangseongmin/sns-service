@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.example.util.QueryFactory.findAllByA;
 import static com.example.util.QueryType.FIND_ALL_BY_A;
 
 @RequiredArgsConstructor
@@ -32,7 +33,7 @@ public class MemberNicknameHistoryRepository {
             .build();
 
     public List<MemberNicknameHistory> findAllByMemberId(Long memberId) {
-        String sql = String.format(FIND_ALL_BY_A.getQuery(), TABLE, "memberId", "memberId");
+        String sql = findAllByA(TABLE, "memberId", "memberId");
         MapSqlParameterSource params = new MapSqlParameterSource().addValue("memberId", memberId);
         return namedParameterJdbcTemplate.query(sql, params, rowMapper);
     }

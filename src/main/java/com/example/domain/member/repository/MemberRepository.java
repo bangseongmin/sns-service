@@ -16,8 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.util.QueryType.FIND_ALL_BY_A;
-import static com.example.util.QueryType.FIND_ALL_BY_IN_LIST;
+import static com.example.util.QueryFactory.*;
 
 @RequiredArgsConstructor
 @Repository
@@ -41,7 +40,7 @@ public class MemberRepository {
          * FROM Member
          * WHERE id = :id
          */
-        String sql = String.format(FIND_ALL_BY_A.getQuery(), TABLE, "id", "id");
+        String sql = findAllByA(TABLE, "id", "id");
         MapSqlParameterSource param = new MapSqlParameterSource().addValue("id", id);
 
         Member member = namedParameterJdbcTemplate.queryForObject(sql, param, rowMapper);
@@ -49,7 +48,7 @@ public class MemberRepository {
     }
 
     public List<Member> findAllByIdInIds(List<Long> ids) {
-        String sql = String.format(FIND_ALL_BY_IN_LIST.getQuery(), TABLE, "id", "ids");
+        String sql = findAllByAInList(TABLE, "id", "ids");
         MapSqlParameterSource param = new MapSqlParameterSource().addValue("ids", ids);
         return namedParameterJdbcTemplate.query(sql, param, rowMapper);
     }
@@ -84,7 +83,7 @@ public class MemberRepository {
     }
 
     private Member update(Member member) {
-        String sql = String.format("UPDATE %s SET email = :email, nickname = :nickname, birthday = :birthday WHERE id = :id", TABLE);
+        String sql = updateMember(TABLE);
 
         SqlParameterSource param = new BeanPropertySqlParameterSource(member);
         namedParameterJdbcTemplate.update(sql, param);
