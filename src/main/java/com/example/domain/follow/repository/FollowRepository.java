@@ -38,6 +38,7 @@ public class FollowRepository {
     public Follow save(Follow follow) {
         if(follow.getId() == null) {
             em.persist(follow);
+            return follow;
         }
 
         throw new UnsupportedOperationException("Follow는 갱신을 지원하지 않습니다.");
